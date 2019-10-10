@@ -35,7 +35,7 @@ int main (int argc, char *argv[])
 
     // update third field
     triple.third(42);
-    std::cout << "third = " << triple.second() << std::endl;
+    std::cout << "third = " << triple.third() << std::endl;
 
     // next line should trigger an assertion error since 12345 needs more than 8 bit
     // triple.second(12345);
