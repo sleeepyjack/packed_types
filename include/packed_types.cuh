@@ -356,23 +356,10 @@ private:
 // std::get support
 template<std::size_t I, class Base, Base B1, Base B2, Base B3, Base B4>
 HOSTDEVICEQUALIFIER INLINEQUALIFIER
-constexpr typename std::enable_if_t<I == 0, Base> 
-get(detail::Pack<Base, B1, B2, B3, B4> pack) noexcept { return pack.first(); }
-
-template<std::size_t I, class Base, Base B1, Base B2, Base B3, Base B4>
-HOSTDEVICEQUALIFIER INLINEQUALIFIER
-constexpr typename std::enable_if_t<I == 1, Base> 
-get(detail::Pack<Base, B1, B2, B3, B4> pack) noexcept { return pack.second(); }
-
-template<std::size_t I, class Base, Base B1, Base B2, Base B3, Base B4>
-HOSTDEVICEQUALIFIER INLINEQUALIFIER
-constexpr typename std::enable_if_t<I == 2 && B3, Base> 
-get(detail::Pack<Base, B1, B2, B3, B4> pack) noexcept { return pack.third(); }
-
-template<std::size_t I, class Base, Base B1, Base B2, Base B3, Base B4>
-HOSTDEVICEQUALIFIER INLINEQUALIFIER
-constexpr typename std::enable_if_t<I == 3 && B3 && B4, Base> 
-get(detail::Pack<Base, B1, B2, B3, B4> pack) noexcept { return pack.fourth(); }
+Base get(detail::Pack<Base, B1, B2, B3, B4> pack) noexcept 
+{ 
+    return pack.template get<I>(); 
+}
 
 // packed type aliases
 template<class Base, Base FirstBits, Base SecondBits>
