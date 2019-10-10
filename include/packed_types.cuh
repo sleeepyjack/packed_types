@@ -125,10 +125,10 @@ public:
         Base B2 = FourthBits,
 	    class   = std::enable_if_t<B1 == 0 && B2 == 0>>
     HOSTDEVICEQUALIFIER
-    constexpr Pack(Base first, Base second) noexcept : base_() 
+    constexpr Pack(Base first_, Base second_) noexcept : base_() 
     {
-        set_first(first);
-        set_second(second);
+        first(first_);
+        second(second_);
     }
 
     template<
@@ -136,11 +136,11 @@ public:
         Base B2 = FourthBits,
         class   = std::enable_if_t<B1 != 0 && B2 == 0>>
     HOSTDEVICEQUALIFIER
-    constexpr Pack(Base first, Base second, Base third) noexcept : base_() 
+    constexpr Pack(Base first_, Base second_, Base third_) noexcept : base_() 
     {
-        set_first(first);
-        set_second(second);
-        set_third(third);
+        first(first_);
+        second(second_);
+        third(third_);
     }
 
     template<
@@ -148,12 +148,12 @@ public:
         Base B2 = FourthBits,
 	    class   = std::enable_if_t<B1 != 0 && B2 != 0>>
     HOSTDEVICEQUALIFIER
-    constexpr Pack(Base first, Base second, Base third, Base fourth) noexcept : base_() 
+    constexpr Pack(Base first_, Base second_, Base third_, Base fourth_) noexcept : base_() 
     {
-        set_first(first);
-        set_second(second);
-        set_third(third);
-        set_fourth(fourth);
+        first(first_);
+        second(second_);
+        third(third_);
+        fourth(fourth_);
     }
 
     constexpr Pack(const Pack&) noexcept = default;
@@ -166,51 +166,51 @@ public:
     }
 
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    constexpr void set_first(Base first) noexcept
+    constexpr void first(Base first_) noexcept
     {
-        assert(is_valid_first(first));
+        assert(is_valid_first(first_));
         const auto shift = SecondBits + ThirdBits + FourthBits + PaddingBits;
-        base_ = (base_ & ~first_mask) + (first << shift);
+        base_ = (base_ & ~first_mask) + (first_ << shift);
     }
 
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    constexpr void set_second(Base second) noexcept
+    constexpr void second(Base second_) noexcept
     {
-        assert(is_valid_second(second));
+        assert(is_valid_second(second_));
         const auto shift = ThirdBits + FourthBits + PaddingBits;
-        base_ = (base_ & ~second_mask) + (second << shift);
+        base_ = (base_ & ~second_mask) + (second_ << shift);
     }
 
     template<
         Base B = ThirdBits,
 	    class  = std::enable_if_t<B != 0>>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    constexpr void set_third(Base third) noexcept
+    constexpr void third(Base third_) noexcept
     {
-        assert(is_valid_third(third));
+        assert(is_valid_third(third_));
         const Base shift = FourthBits + PaddingBits;
-        base_ = (base_ & ~third_mask) + (third << shift);
+        base_ = (base_ & ~third_mask) + (third_ << shift);
     }
 
     template<
         Base B = FourthBits,
 	    class  = std::enable_if_t<B != 0>>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    constexpr void set_fourth(Base fourth) noexcept
+    constexpr void fourth(Base fourth_) noexcept
     {
-        assert(is_valid_fourth(fourth));
+        assert(is_valid_fourth(fourth_));
         const Base shift = PaddingBits;
-        base_ = (base_ & ~fourth_mask) + (fourth << shift);
+        base_ = (base_ & ~fourth_mask) + (fourth_ << shift);
     }
 
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    constexpr Base get_first() const noexcept
+    constexpr Base first() const noexcept
     {
         return (base_ >> (SecondBits + ThirdBits + FourthBits + PaddingBits));
     }
 
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    constexpr Base get_second() const noexcept
+    constexpr Base second() const noexcept
     {
         return ((base_ & second_mask) >> (ThirdBits + FourthBits + PaddingBits));
     }
@@ -219,7 +219,7 @@ public:
         Base B = ThirdBits,
 	    class  = std::enable_if_t<B != 0>>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    constexpr Base get_third() const noexcept
+    constexpr Base third() const noexcept
     {
         return ((base_ & third_mask) >> (FourthBits + PaddingBits));
     }
@@ -228,68 +228,68 @@ public:
         Base B = FourthBits,
 	    class  = std::enable_if_t<B != 0>>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    constexpr Base get_fourth() const noexcept
+    constexpr Base fourth() const noexcept
     {
         return ((base_ & fourth_mask) >> (PaddingBits));
     }
 
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    static constexpr bool is_valid_first(Base first) noexcept
+    static constexpr bool is_valid_first(Base first_) noexcept
     {
-        return (first <= first_max());
+        return (first_ <= first_max());
     }
 
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    static constexpr bool is_valid_second(Base second) noexcept
+    static constexpr bool is_valid_second(Base second_) noexcept
     {
-        return (second <= second_max());
+        return (second_ <= second_max());
     }
 
     template<
         Base B = ThirdBits,
 	    class  = std::enable_if_t<B != 0>>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    static constexpr bool is_valid_third(Base third) noexcept
+    static constexpr bool is_valid_third(Base third_) noexcept
     {
-        return (third <= third_max());
+        return (third_ <= third_max());
     }
 
     template<
         Base B = FourthBits,
 	    class  = std::enable_if_t<B != 0>>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    static constexpr bool is_valid_fourth(Base fourth) noexcept
+    static constexpr bool is_valid_fourth(Base fourth_) noexcept
     {
-        return (fourth <= fourth_max());
+        return (fourth_ <= fourth_max());
     }
 
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    bool constexpr operator==(const Pack& base) const noexcept
+    bool constexpr operator==(const Pack& pack_) const noexcept
     {
-        return base_ == base.base_;
+        return base_ == pack_.base_;
     }
 
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    bool constexpr operator!=(const Pack& base) const noexcept
+    bool constexpr operator!=(const Pack& pack_) const noexcept
     {
-        return base_ != base.base_;
+        return base_ != pack_.base_;
     }
 
     DEVICEQUALIFIER INLINEQUALIFIER
     friend Pack atomicCAS(
-        Pack * address, 
-        Pack   compare, 
-        Pack   val) noexcept
+        Pack * address_, 
+        Pack   compare_, 
+        Pack   val_) noexcept
     {
-        return Pack(atomicCAS(&(address->base_), compare.base_, val.base_));
+        return Pack(atomicCAS(&(address_->base_), compare_.base_, val_.base_));
     }
 
     DEVICEQUALIFIER INLINEQUALIFIER
     friend Pack atomicExch(
-        Pack * address, 
-        Pack   val) noexcept
+        Pack * address_, 
+        Pack   val_) noexcept
     {
-        return Pack(atomicExch(&(address->base_), val.base_));
+        return Pack(atomicExch(&(address_->base_), val_.base_));
     }
 
 private:

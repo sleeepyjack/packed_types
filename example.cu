@@ -25,20 +25,20 @@ int main (int argc, char *argv[])
     // get fields
     std::cout 
         << "triple = (" 
-        << triple.get_first() 
+        << triple.first() 
         << ", " 
-        << triple.get_second() 
+        << triple.second() 
         << ", " 
-        << triple.get_third() 
+        << triple.third() 
         << ")" 
         << std::endl;
 
     // update third field
-    triple.set_third(42);
-    std::cout << "third = " << triple.get_second() << std::endl;
+    triple.third(42);
+    std::cout << "third = " << triple.second() << std::endl;
 
     // next line should trigger an assertion error since 12345 needs more than 8 bit
-    // triple.set_second(12345);
+    // triple.second(12345);
     std::cout << "should be false: " << pack_t::is_valid_second(12345) << std::endl;
     std::cout << "maximum value for second field is " << pack_t::second_max() << std::endl;
 }

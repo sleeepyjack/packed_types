@@ -15,8 +15,6 @@ TEMPLATE_TEST_CASE_SIG(
         (std::uint64_t, 34, 30),
         (std::uint64_t, 7, 7))
 {
-    using namespace warpcore;
-
     REQUIRE(FirstBits + SecondBits <= sizeof(Base) * 8);
 
     using pack_t = PackedPair<Base, FirstBits, SecondBits>;
@@ -51,16 +49,16 @@ TEMPLATE_TEST_CASE_SIG(
         pack_t empty_too = pack_t::empty();
 
         CHECK(empty == empty_too);
-        CHECK(empty.get_first() == 0);
-        CHECK(empty.get_second() == 0);
+        CHECK(empty.first() == 0);
+        CHECK(empty.second() == 0);
     }
 
     SECTION("set and get pack")
     {
         pack_t pack(first, second);
 
-        CHECK(pack.get_first() == first);
-        CHECK(pack.get_second() == second);
+        CHECK(pack.first() == first);
+        CHECK(pack.second() == second);
 
         SECTION("equality operator")
         {
@@ -71,36 +69,36 @@ TEMPLATE_TEST_CASE_SIG(
 
         SECTION("update first")
         {
-            pack.set_first(update);
+            pack.first(update);
 
-            CHECK(pack.get_first() == update);
-            CHECK(pack.get_second() == second);
+            CHECK(pack.first() == update);
+            CHECK(pack.second() == second);
         }
 
         SECTION("update second")
         {
-            pack.set_second(update);
+            pack.second(update);
 
-            CHECK(pack.get_first() == first);
-            CHECK(pack.get_second() == update);
+            CHECK(pack.first() == first);
+            CHECK(pack.second() == update);
         }
 
         SECTION("maximum first value")
         {
-            pack.set_first(first_max);
+            pack.first(first_max);
 
             CHECK(first_max != 0);
-            CHECK(pack.get_first() == first_max);
-            CHECK(pack.get_second() == second);
+            CHECK(pack.first() == first_max);
+            CHECK(pack.second() == second);
         }
 
         SECTION("maximum second value")
         {
-            pack.set_second(second_max);
+            pack.second(second_max);
 
             CHECK(second_max != 0);
-            CHECK(pack.get_first() == first);
-            CHECK(pack.get_second() == second_max);
+            CHECK(pack.first() == first);
+            CHECK(pack.second() == second_max);
         }
 
         SECTION("atomic operations")
@@ -167,8 +165,6 @@ TEMPLATE_TEST_CASE_SIG(
         (std::uint64_t, 23, 19, 22),
         (std::uint64_t, 7, 7, 7))
 {
-    using namespace warpcore;
-
     REQUIRE(FirstBits + SecondBits + ThirdBits <= sizeof(Base) * 8);
 
     using pack_t = PackedTriple<Base, FirstBits, SecondBits, ThirdBits>;
@@ -209,18 +205,18 @@ TEMPLATE_TEST_CASE_SIG(
         pack_t empty_too = pack_t::empty();
 
         CHECK(empty == empty_too);
-        CHECK(empty.get_first() == 0);
-        CHECK(empty.get_second() == 0);
-        CHECK(empty.get_third() == 0);
+        CHECK(empty.first() == 0);
+        CHECK(empty.second() == 0);
+        CHECK(empty.third() == 0);
     }
 
     SECTION("set and get pack")
     {
         pack_t pack(first, second, third);
 
-        CHECK(pack.get_first() == first);
-        CHECK(pack.get_second() == second);
-        CHECK(pack.get_third() == third);
+        CHECK(pack.first() == first);
+        CHECK(pack.second() == second);
+        CHECK(pack.third() == third);
 
         SECTION("equality operator")
         {
@@ -231,59 +227,59 @@ TEMPLATE_TEST_CASE_SIG(
 
         SECTION("update first")
         {
-            pack.set_first(update);
+            pack.first(update);
 
-            CHECK(pack.get_first() == update);
-            CHECK(pack.get_second() == second);
-            CHECK(pack.get_third() == third);
+            CHECK(pack.first() == update);
+            CHECK(pack.second() == second);
+            CHECK(pack.third() == third);
         }
 
         SECTION("update second")
         {
-            pack.set_second(update);
+            pack.second(update);
 
-            CHECK(pack.get_first() == first);
-            CHECK(pack.get_second() == update);
-            CHECK(pack.get_third() == third);
+            CHECK(pack.first() == first);
+            CHECK(pack.second() == update);
+            CHECK(pack.third() == third);
         }
 
         SECTION("update third")
         {
-            pack.set_third(update);
+            pack.third(update);
 
-            CHECK(pack.get_first() == first);
-            CHECK(pack.get_second() == second);
-            CHECK(pack.get_third() == update);
+            CHECK(pack.first() == first);
+            CHECK(pack.second() == second);
+            CHECK(pack.third() == update);
         }
 
         SECTION("maximum first value")
         {
-            pack.set_first(first_max);
+            pack.first(first_max);
 
             CHECK(first_max != 0);
-            CHECK(pack.get_first() == first_max);
-            CHECK(pack.get_second() == second);
-            CHECK(pack.get_third() == third);
+            CHECK(pack.first() == first_max);
+            CHECK(pack.second() == second);
+            CHECK(pack.third() == third);
         }
 
         SECTION("maximum second value")
         {
-            pack.set_second(second_max);
+            pack.second(second_max);
 
             CHECK(second_max != 0);
-            CHECK(pack.get_first() == first);
-            CHECK(pack.get_second() == second_max);
-            CHECK(pack.get_third() == third);
+            CHECK(pack.first() == first);
+            CHECK(pack.second() == second_max);
+            CHECK(pack.third() == third);
         }
 
         SECTION("maximum third value")
         {
-            pack.set_third(third_max);
+            pack.third(third_max);
 
             CHECK(third_max != 0);
-            CHECK(pack.get_first() == first);
-            CHECK(pack.get_second() == second);
-            CHECK(pack.get_third() == third_max);
+            CHECK(pack.first() == first);
+            CHECK(pack.second() == second);
+            CHECK(pack.third() == third_max);
         }
 
         SECTION("atomic operations")
@@ -350,8 +346,6 @@ TEMPLATE_TEST_CASE_SIG(
         (std::uint64_t, 8, 8, 32, 16),
         (std::uint64_t, 7, 7, 7, 7))
 {
-    using namespace warpcore;
-
     REQUIRE(FirstBits + SecondBits + ThirdBits + FourthBits <= sizeof(Base) * 8);
 
     using pack_t = PackedQuadruple<Base, FirstBits, SecondBits, ThirdBits, FourthBits>;
@@ -369,14 +363,14 @@ TEMPLATE_TEST_CASE_SIG(
 
     CAPTURE(first, second, third, fourth, update, first_max, second_max, third_max, fourth_max);
 
-    REQUIRE(first   <= first_max);
-    REQUIRE(second  <= second_max);
-    REQUIRE(third   <= third_max);
-    REQUIRE(fourth  <= fourth_max);
-    REQUIRE(update  <= first_max);
-    REQUIRE(update  <= second_max);
-    REQUIRE(update  <= third_max);
-    REQUIRE(update  <= fourth_max);
+    REQUIRE(first  <= first_max);
+    REQUIRE(second <= second_max);
+    REQUIRE(third  <= third_max);
+    REQUIRE(fourth <= fourth_max);
+    REQUIRE(update <= first_max);
+    REQUIRE(update <= second_max);
+    REQUIRE(update <= third_max);
+    REQUIRE(update <= fourth_max);
 
     CHECK(pack_t::is_valid_first(first));
     CHECK(pack_t::is_valid_second(second));
@@ -398,20 +392,20 @@ TEMPLATE_TEST_CASE_SIG(
         pack_t empty_too = pack_t::empty();
 
         CHECK(empty == empty_too);
-        CHECK(empty.get_first() == 0);
-        CHECK(empty.get_second() == 0);
-        CHECK(empty.get_third() == 0);
-        CHECK(empty.get_fourth() == 0);
+        CHECK(empty.first() == 0);
+        CHECK(empty.second() == 0);
+        CHECK(empty.third() == 0);
+        CHECK(empty.fourth() == 0);
     }
 
     SECTION("set and get pack")
     {
         pack_t pack(first, second, third, fourth);
 
-        CHECK(pack.get_first() == first);
-        CHECK(pack.get_second() == second);
-        CHECK(pack.get_third() == third);
-        CHECK(pack.get_fourth() == fourth);
+        CHECK(pack.first() == first);
+        CHECK(pack.second() == second);
+        CHECK(pack.third() == third);
+        CHECK(pack.fourth() == fourth);
 
         SECTION("equality operator")
         {
@@ -422,86 +416,86 @@ TEMPLATE_TEST_CASE_SIG(
 
         SECTION("update first")
         {
-            pack.set_first(update);
+            pack.first(update);
 
-            CHECK(pack.get_first() == update);
-            CHECK(pack.get_second() == second);
-            CHECK(pack.get_third() == third);
-            CHECK(pack.get_fourth() == fourth);
+            CHECK(pack.first() == update);
+            CHECK(pack.second() == second);
+            CHECK(pack.third() == third);
+            CHECK(pack.fourth() == fourth);
         }
 
         SECTION("update second")
         {
-            pack.set_second(update);
+            pack.second(update);
 
-            CHECK(pack.get_first() == first);
-            CHECK(pack.get_second() == update);
-            CHECK(pack.get_third() == third);
-            CHECK(pack.get_fourth() == fourth);
+            CHECK(pack.first() == first);
+            CHECK(pack.second() == update);
+            CHECK(pack.third() == third);
+            CHECK(pack.fourth() == fourth);
         }
 
         SECTION("update third")
         {
-            pack.set_third(update);
+            pack.third(update);
 
-            CHECK(pack.get_first() == first);
-            CHECK(pack.get_second() == second);
-            CHECK(pack.get_third() == update);
-            CHECK(pack.get_fourth() == fourth);
+            CHECK(pack.first() == first);
+            CHECK(pack.second() == second);
+            CHECK(pack.third() == update);
+            CHECK(pack.fourth() == fourth);
         }
 
         SECTION("update fourth")
         {
-            pack.set_fourth(update);
+            pack.fourth(update);
 
-            CHECK(pack.get_first() == first);
-            CHECK(pack.get_second() == second);
-            CHECK(pack.get_third() == third);
-            CHECK(pack.get_fourth() == update);
+            CHECK(pack.first() == first);
+            CHECK(pack.second() == second);
+            CHECK(pack.third() == third);
+            CHECK(pack.fourth() == update);
         }
 
         SECTION("maximum first value")
         {
-            pack.set_first(first_max);
+            pack.first(first_max);
 
             CHECK(first_max != 0);
-            CHECK(pack.get_first() == first_max);
-            CHECK(pack.get_second() == second);
-            CHECK(pack.get_third() == third);
-            CHECK(pack.get_fourth() == fourth);
+            CHECK(pack.first() == first_max);
+            CHECK(pack.second() == second);
+            CHECK(pack.third() == third);
+            CHECK(pack.fourth() == fourth);
         }
 
         SECTION("maximum second value")
         {
-            pack.set_second(second_max);
+            pack.second(second_max);
 
             CHECK(second_max != 0);
-            CHECK(pack.get_first() == first);
-            CHECK(pack.get_second() == second_max);
-            CHECK(pack.get_third() == third);
-            CHECK(pack.get_fourth() == fourth);
+            CHECK(pack.first() == first);
+            CHECK(pack.second() == second_max);
+            CHECK(pack.third() == third);
+            CHECK(pack.fourth() == fourth);
         }
 
         SECTION("maximum third value")
         {
-            pack.set_third(third_max);
+            pack.third(third_max);
 
             CHECK(third_max != 0);
-            CHECK(pack.get_first() == first);
-            CHECK(pack.get_second() == second);
-            CHECK(pack.get_third() == third_max);
-            CHECK(pack.get_fourth() == fourth);
+            CHECK(pack.first() == first);
+            CHECK(pack.second() == second);
+            CHECK(pack.third() == third_max);
+            CHECK(pack.fourth() == fourth);
         }
 
         SECTION("maximum third value")
         {
-            pack.set_fourth(fourth_max);
+            pack.fourth(fourth_max);
 
             CHECK(third_max != 0);
-            CHECK(pack.get_first() == first);
-            CHECK(pack.get_second() == second);
-            CHECK(pack.get_third() == third);
-            CHECK(pack.get_fourth() == fourth_max);
+            CHECK(pack.first() == first);
+            CHECK(pack.second() == second);
+            CHECK(pack.third() == third);
+            CHECK(pack.fourth() == fourth_max);
         }
 
         SECTION("atomic operations")
