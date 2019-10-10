@@ -1,29 +1,12 @@
-#pragma once
+#ifndef PACKED_TYPES_CUH
+#define PACKED_TYPES_CUH
 
 #include <cstdint>
 #include <type_traits>
 #include <assert.h>
+#include "cudahelpers/cuda_helpers.cuh"
 
 // INFO you can find the actual types as using statements at the end of this file
-
-// cross platform classifiers
-#ifdef __CUDACC__
-    #define HOSTDEVICEQUALIFIER  __host__ __device__
-#else
-    #define HOSTDEVICEQUALIFIER
-#endif
-
-#ifdef __CUDACC__
-    #define INLINEQUALIFIER  __forceinline__
-#else
-    #define INLINEQUALIFIER inline
-#endif
-
-#ifdef __CUDACC__
-    #define DEVICEQUALIFIER  __device__
-#else
-    #define DEVICEQUALIFIER
-#endif
 
 namespace detail
 {
@@ -370,16 +353,6 @@ private:
 
 } // namespace detail
 
-// packed type aliases
-template<class Base, Base FirstBits, Base SecondBits>
-using PackedPair = detail::Pack<Base, FirstBits, SecondBits>;
-
-template<class Base, Base FirstBits, Base SecondBits, Base ThirdBits>
-using PackedTriple = detail::Pack<Base, FirstBits, SecondBits, ThirdBits>;
-
-template<class Base, Base FirstBits, Base SecondBits, Base ThirdBits, Base FourthBits>
-using PackedQuadruple = detail::Pack<Base, FirstBits, SecondBits, ThirdBits, FourthBits>;
-
 // std::get support
 template<std::size_t I, class Base, Base B1, Base B2, Base B3, Base B4>
 HOSTDEVICEQUALIFIER INLINEQUALIFIER
@@ -400,3 +373,17 @@ template<std::size_t I, class Base, Base B1, Base B2, Base B3, Base B4>
 HOSTDEVICEQUALIFIER INLINEQUALIFIER
 constexpr typename std::enable_if_t<I == 3 && B3 && B4, Base> 
 get(detail::Pack<Base, B1, B2, B3, B4> pack) noexcept { return pack.fourth(); }
+
+// packed type aliases
+template<class Base, Base FirstBits, Base SecondBits>
+using PackedPair = detail::Pack<Base, FirstBits, SecondBits>;
+
+template<class Base, Base FirstBits, Base SecondBits, Base ThirdBits, 
+    class = std::enable_if_t<ThirdBits>>
+using PackedTriple = detail::Pack<Base, FirstBits, SecondBits, ThirdBits>;
+
+template<class Base, Base FirstBits, Base SecondBits, Base ThirdBits, Base FourthBits, 
+    class = std::enable_if_t<ThirdBits && FourthBits>>
+using PackedQuadruple = detail::Pack<Base, FirstBits, SecondBits, ThirdBits, FourthBits>;
+
+#endif /*PACKED_TYPES_CUH*/

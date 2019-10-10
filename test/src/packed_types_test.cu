@@ -1,5 +1,6 @@
 #include "catch.hpp"
 #include "packed_types.cuh"
+#include "cudahelpers/cuda_helpers.cuh"
 
 TEMPLATE_TEST_CASE_SIG(
     "PackedPair with variable split", 
@@ -60,6 +61,12 @@ TEMPLATE_TEST_CASE_SIG(
         CHECK(pack.first() == first);
         CHECK(pack.second() == second);
 
+        CHECK(pack.template get<0>() == first);
+        CHECK(pack.template get<1>() == second);
+
+        CHECK(get<0>(pack) == first);
+        CHECK(get<1>(pack) == second);
+
         SECTION("equality operator")
         {
             pack_t pack_too = pack;
@@ -77,7 +84,7 @@ TEMPLATE_TEST_CASE_SIG(
 
         SECTION("update second")
         {
-            pack.second(update);
+            pack.template set<1>(update);
 
             CHECK(pack.first() == first);
             CHECK(pack.second() == update);
@@ -218,6 +225,14 @@ TEMPLATE_TEST_CASE_SIG(
         CHECK(pack.second() == second);
         CHECK(pack.third() == third);
 
+        CHECK(pack.template get<0>() == first);
+        CHECK(pack.template get<1>() == second);
+        CHECK(pack.template get<2>() == third);
+
+        CHECK(get<0>(pack) == first);
+        CHECK(get<1>(pack) == second);
+        CHECK(get<2>(pack) == third);
+
         SECTION("equality operator")
         {
             pack_t pack_too = pack;
@@ -236,7 +251,7 @@ TEMPLATE_TEST_CASE_SIG(
 
         SECTION("update second")
         {
-            pack.second(update);
+            pack.template set<1>(update);
 
             CHECK(pack.first() == first);
             CHECK(pack.second() == update);
@@ -407,6 +422,16 @@ TEMPLATE_TEST_CASE_SIG(
         CHECK(pack.third() == third);
         CHECK(pack.fourth() == fourth);
 
+        CHECK(pack.template get<0>() == first);
+        CHECK(pack.template get<1>() == second);
+        CHECK(pack.template get<2>() == third);
+        CHECK(pack.template get<3>() == fourth);
+
+        CHECK(get<0>(pack) == first);
+        CHECK(get<1>(pack) == second);
+        CHECK(get<2>(pack) == third);
+        CHECK(get<3>(pack) == fourth);
+
         SECTION("equality operator")
         {
             pack_t pack_too = pack;
@@ -426,7 +451,7 @@ TEMPLATE_TEST_CASE_SIG(
 
         SECTION("update second")
         {
-            pack.second(update);
+            pack.template set<1>(update);
 
             CHECK(pack.first() == first);
             CHECK(pack.second() == update);
