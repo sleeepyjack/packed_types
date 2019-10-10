@@ -3,9 +3,27 @@
 #include <cstdint>
 #include <type_traits>
 #include <assert.h>
-#include "cudahelpers/cuda_helpers.cuh"
 
 // INFO you can find the actual types as using statements at the end of this file
+
+// cross platform classifiers
+#ifdef __CUDACC__
+    #define HOSTDEVICEQUALIFIER  __host__ __device__
+#else
+    #define HOSTDEVICEQUALIFIER
+#endif
+
+#ifdef __CUDACC__
+    #define INLINEQUALIFIER  __forceinline__
+#else
+    #define INLINEQUALIFIER inline
+#endif
+
+#ifdef __CUDACC__
+    #define DEVICEQUALIFIER  __device__
+#else
+    #define DEVICEQUALIFIER
+#endif
 
 namespace detail
 {
@@ -35,7 +53,7 @@ class Pack
     static_assert(std::is_unsigned<Base>::value,
         "Base must be unsigned type.");
 
-
+    // bit masks for each individual field
     static constexpr Base PaddingBits = 
         (sizeof(Base) * 8) - (FirstBits + SecondBits + ThirdBits + FourthBits);
 
@@ -65,6 +83,7 @@ class Pack
 public:
     using base_type = Base;
 
+    // number of bits per field
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
     static constexpr Base padding_bits() noexcept { return PaddingBits; }
 
@@ -86,7 +105,7 @@ public:
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
     static constexpr Base fourth_bits() noexcept { return FourthBits; }
 
-
+    // maximum value for each field to fit into pack
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
     static constexpr Base first_max() noexcept
     { 
@@ -159,12 +178,15 @@ public:
     constexpr Pack(const Pack&) noexcept = default;
     constexpr Pack(Pack&& pair) noexcept = default;
 
+    // returns an empty pack
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
     static constexpr Pack empty() noexcept 
     { 
         return Pack(Base{0});
     }
 
+    // SETTERS
+    // by field name
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
     constexpr void first(Base first_) noexcept
     {
@@ -203,6 +225,8 @@ public:
         base_ = (base_ & ~fourth_mask) + (fourth_ << shift);
     }
 
+    // GETTERS
+    // by field name
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
     constexpr Base first() const noexcept
     {
@@ -232,6 +256,50 @@ public:
     {
         return ((base_ & fourth_mask) >> (PaddingBits));
     }
+
+    // SETTERS
+    // set<index>(value)
+    template<std::size_t I>
+    HOSTDEVICEQUALIFIER INLINEQUALIFIER
+    constexpr typename std::enable_if_t<I == 0, void> 
+    set(Base first_) noexcept { first(first_); }
+
+    template<std::size_t I>
+    HOSTDEVICEQUALIFIER INLINEQUALIFIER
+    constexpr typename std::enable_if_t<I == 1, void> 
+    set(Base second_) noexcept { second(second_); }
+
+    template<std::size_t I>
+    HOSTDEVICEQUALIFIER INLINEQUALIFIER
+    constexpr typename std::enable_if_t<I == 2 && ThirdBits, void> 
+    set(Base third_) noexcept { third(third_); }
+
+    template<std::size_t I>
+    HOSTDEVICEQUALIFIER INLINEQUALIFIER
+    constexpr typename std::enable_if_t<I == 3 && ThirdBits && FourthBits, void> 
+    set(Base fourth_) noexcept { fourth(fourth_); }
+
+    // GETTERS
+    // get<index>()
+    template<std::size_t I>
+    HOSTDEVICEQUALIFIER INLINEQUALIFIER
+    constexpr typename std::enable_if_t<I == 0, Base> 
+    get() const noexcept { return first(); }
+
+    template<std::size_t I>
+    HOSTDEVICEQUALIFIER INLINEQUALIFIER
+    constexpr typename std::enable_if_t<I == 1, Base> 
+    get() const noexcept { return second(); }
+
+    template<std::size_t I>
+    HOSTDEVICEQUALIFIER INLINEQUALIFIER
+    constexpr typename std::enable_if_t<I == 2 && ThirdBits, Base> 
+    get() const noexcept { return third(); }
+
+    template<std::size_t I>
+    HOSTDEVICEQUALIFIER INLINEQUALIFIER
+    constexpr typename std::enable_if_t<I == 3 && ThirdBits && FourthBits, Base> 
+    get() const noexcept { return fourth(); }
 
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
     static constexpr bool is_valid_first(Base first_) noexcept
@@ -302,6 +370,7 @@ private:
 
 } // namespace detail
 
+// packed type aliases
 template<class Base, Base FirstBits, Base SecondBits>
 using PackedPair = detail::Pack<Base, FirstBits, SecondBits>;
 
@@ -310,3 +379,24 @@ using PackedTriple = detail::Pack<Base, FirstBits, SecondBits, ThirdBits>;
 
 template<class Base, Base FirstBits, Base SecondBits, Base ThirdBits, Base FourthBits>
 using PackedQuadruple = detail::Pack<Base, FirstBits, SecondBits, ThirdBits, FourthBits>;
+
+// std::get support
+template<std::size_t I, class Base, Base B1, Base B2, Base B3, Base B4>
+HOSTDEVICEQUALIFIER INLINEQUALIFIER
+constexpr typename std::enable_if_t<I == 0, Base> 
+get(detail::Pack<Base, B1, B2, B3, B4> pack) noexcept { return pack.first(); }
+
+template<std::size_t I, class Base, Base B1, Base B2, Base B3, Base B4>
+HOSTDEVICEQUALIFIER INLINEQUALIFIER
+constexpr typename std::enable_if_t<I == 1, Base> 
+get(detail::Pack<Base, B1, B2, B3, B4> pack) noexcept { return pack.second(); }
+
+template<std::size_t I, class Base, Base B1, Base B2, Base B3, Base B4>
+HOSTDEVICEQUALIFIER INLINEQUALIFIER
+constexpr typename std::enable_if_t<I == 2 && B3, Base> 
+get(detail::Pack<Base, B1, B2, B3, B4> pack) noexcept { return pack.third(); }
+
+template<std::size_t I, class Base, Base B1, Base B2, Base B3, Base B4>
+HOSTDEVICEQUALIFIER INLINEQUALIFIER
+constexpr typename std::enable_if_t<I == 3 && B3 && B4, Base> 
+get(detail::Pack<Base, B1, B2, B3, B4> pack) noexcept { return pack.fourth(); }
