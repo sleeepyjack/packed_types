@@ -5,7 +5,7 @@ int main (int argc, char *argv[])
 {
     // payload of packed data type
     using base_t = std::uint64_t;
-    // packed type with three fields: 13 bits, 8 bits, 10 bits, (+ 1 bit padding)
+    // packed type with three fields: 13 bits, 8 bits, 34 bits, (+ 9 bits padding)
     using pack_t = PackedTriple<base_t, 13, 8, 34>;
     // using pack_t = PackedPair<base_t, _, _>;
     // using pack_t = PackedQuadrupel<base_t, _, _, _, _>;
