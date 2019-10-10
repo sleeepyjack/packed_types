@@ -351,6 +351,14 @@ private:
 
 }; // class Pack
 
+template<class Base, Base FirstBits, Base SecondBits, Base ThirdBits, 
+    class = std::enable_if_t<ThirdBits>>
+using PackedTriple = detail::Pack<Base, FirstBits, SecondBits, ThirdBits>;
+
+template<class Base, Base FirstBits, Base SecondBits, Base ThirdBits, Base FourthBits, 
+    class = std::enable_if_t<ThirdBits && FourthBits>>
+using PackedQuadruple = detail::Pack<Base, FirstBits, SecondBits, ThirdBits, FourthBits>;
+
 } // namespace detail
 
 // std::get support
@@ -365,12 +373,10 @@ Base get(detail::Pack<Base, B1, B2, B3, B4> pack) noexcept
 template<class Base, Base FirstBits, Base SecondBits>
 using PackedPair = detail::Pack<Base, FirstBits, SecondBits>;
 
-template<class Base, Base FirstBits, Base SecondBits, Base ThirdBits, 
-    class = std::enable_if_t<ThirdBits>>
-using PackedTriple = detail::Pack<Base, FirstBits, SecondBits, ThirdBits>;
+template<class Base, Base FirstBits, Base SecondBits, Base ThirdBits>
+using PackedTriple = detail::PackedTriple<Base, FirstBits, SecondBits, ThirdBits>;
 
-template<class Base, Base FirstBits, Base SecondBits, Base ThirdBits, Base FourthBits, 
-    class = std::enable_if_t<ThirdBits && FourthBits>>
-using PackedQuadruple = detail::Pack<Base, FirstBits, SecondBits, ThirdBits, FourthBits>;
+template<class Base, Base FirstBits, Base SecondBits, Base ThirdBits, Base FourthBits>
+using PackedQuadruple = detail::PackedQuadruple<Base, FirstBits, SecondBits, ThirdBits, FourthBits>;
 
 #endif /*PACKED_TYPES_CUH*/
