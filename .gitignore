@@ -1,0 +1,9 @@
+bin/
+build/
+dep/
+data/
+results/
+
+*.out
+*.tmp
+*.swp
