@@ -8,6 +8,23 @@
 
 // INFO you can find the actual types as using statements at the end of this file
 
+template<class To, class From>
+HOSTDEVICEQUALIFIER INLINEQUALIFIER
+constexpr To reinterpret(From from) noexcept
+{
+    union converter_t
+    {
+        From from;
+        To to;
+
+        HOSTDEVICEQUALIFIER
+        converter_t() {};
+    } c;
+
+    c.from = from;
+    return c.to;
+}
+
 namespace detail
 {
 
@@ -174,7 +191,7 @@ public:
     constexpr void first(Base first_) noexcept
     {
         assert(is_valid_first(first_));
-        const auto shift = SecondBits + ThirdBits + FourthBits + PaddingBits;
+        constexpr auto shift = SecondBits + ThirdBits + FourthBits + PaddingBits;
         base_ = (base_ & ~first_mask) + (first_ << shift);
     }
 
@@ -182,7 +199,7 @@ public:
     constexpr void second(Base second_) noexcept
     {
         assert(is_valid_second(second_));
-        const auto shift = ThirdBits + FourthBits + PaddingBits;
+        constexpr auto shift = ThirdBits + FourthBits + PaddingBits;
         base_ = (base_ & ~second_mask) + (second_ << shift);
     }
 
@@ -193,7 +210,7 @@ public:
     constexpr void third(Base third_) noexcept
     {
         assert(is_valid_third(third_));
-        const Base shift = FourthBits + PaddingBits;
+        constexpr auto shift = FourthBits + PaddingBits;
         base_ = (base_ & ~third_mask) + (third_ << shift);
     }
 
@@ -204,7 +221,7 @@ public:
     constexpr void fourth(Base fourth_) noexcept
     {
         assert(is_valid_fourth(fourth_));
-        const Base shift = PaddingBits;
+        constexpr auto shift = PaddingBits;
         base_ = (base_ & ~fourth_mask) + (fourth_ << shift);
     }
 
