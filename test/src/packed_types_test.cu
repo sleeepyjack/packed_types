@@ -21,10 +21,10 @@ TEMPLATE_TEST_CASE_SIG(
     using pack_t = PackedPair<Base, FirstBits, SecondBits>;
     using base_t   = typename pack_t::base_type;
     
-    const base_t first_max = pack_t::first_max();
-    const base_t second_max = pack_t::second_max();
-    const base_t first  = GENERATE(as<base_t>{}, 0, 1, 2, 42, pack_t::first_max());
-    const base_t second  = GENERATE(as<base_t>{}, 0, 1, 2, 42, pack_t::second_max());
+    const base_t first_max = (base_t{1} << pack_t::first_bits()) - base_t{1};
+    const base_t second_max = (base_t{1} << pack_t::second_bits()) - base_t{1};
+    const base_t first  = GENERATE(as<base_t>{}, 0, 1, 2, 42);
+    const base_t second  = GENERATE(as<base_t>{}, 0, 1, 2, 42);
     const base_t update = 60;
 
     CAPTURE(first, second, update, first_max, second_max);
@@ -107,7 +107,7 @@ TEMPLATE_TEST_CASE_SIG(
             CHECK(pack.first() == first);
             CHECK(pack.second() == second_max);
         }
-
+        
         SECTION("atomic operations")
         {
             pack_t val = pack_t(update, update);
@@ -134,7 +134,7 @@ TEMPLATE_TEST_CASE_SIG(
 
                 CHECK(pack == val);
             }
-
+            
             SECTION("atomic exchange")
             {
                 cudaMemcpy(pack_d, &pack, sizeof(pack_t), H2D);
@@ -151,10 +151,11 @@ TEMPLATE_TEST_CASE_SIG(
 
                 CHECK(pack == val);
             }
-
+            
             cudaFree(pack_d);
             CHECK(cudaGetLastError() == cudaSuccess);
         }
+        
     }
 }
 
@@ -177,12 +178,12 @@ TEMPLATE_TEST_CASE_SIG(
     using pack_t = PackedTriple<Base, FirstBits, SecondBits, ThirdBits>;
     using base_t = typename pack_t::base_type;
     
-    const base_t first_max = pack_t::first_max();
-    const base_t second_max = pack_t::second_max();
-    const base_t third_max = pack_t::third_max();
-    const base_t first  = GENERATE(as<base_t>{}, 0, 1, 2, 42, pack_t::first_max());
-    const base_t second  = GENERATE(as<base_t>{}, 0, 1, 2, 42, pack_t::second_max());
-    const base_t third  = GENERATE(as<base_t>{}, 0, 1, 2, 42, pack_t::third_max());
+    const base_t first_max = (base_t{1} << pack_t::first_bits()) - base_t{1};
+    const base_t second_max = (base_t{1} << pack_t::second_bits()) - base_t{1};
+    const base_t third_max = (base_t{1} << pack_t::third_bits()) - base_t{1};
+    const base_t first  = GENERATE(as<base_t>{}, 0, 1, 2, 42);
+    const base_t second  = GENERATE(as<base_t>{}, 0, 1, 2, 42);
+    const base_t third  = GENERATE(as<base_t>{}, 0, 1, 2, 42);
     const base_t update = 60;
 
     CAPTURE(first, second, third, update, first_max, second_max, third_max);
@@ -366,14 +367,14 @@ TEMPLATE_TEST_CASE_SIG(
     using pack_t = PackedQuadruple<Base, FirstBits, SecondBits, ThirdBits, FourthBits>;
     using base_t = typename pack_t::base_type;
     
-    const base_t first_max = pack_t::first_max();
-    const base_t second_max = pack_t::second_max();
-    const base_t third_max = pack_t::third_max();
-    const base_t fourth_max = pack_t::fourth_max();
-    const base_t first  = GENERATE(as<base_t>{}, 0, 1, 2, 42, pack_t::first_max());
-    const base_t second  = GENERATE(as<base_t>{}, 0, 1, 2, 42, pack_t::second_max());
-    const base_t third  = GENERATE(as<base_t>{}, 0, 1, 2, 42, pack_t::third_max());
-    const base_t fourth  = GENERATE(as<base_t>{}, 0, 1, 2, 42, pack_t::fourth_max());
+    const base_t first_max = (base_t{1} << pack_t::first_bits()) - base_t{1};
+    const base_t second_max = (base_t{1} << pack_t::second_bits()) - base_t{1};
+    const base_t third_max = (base_t{1} << pack_t::third_bits()) - base_t{1};
+    const base_t fourth_max = (base_t{1} << pack_t::fourth_bits()) - base_t{1};
+    const base_t first  = GENERATE(as<base_t>{}, 0, 1, 2, 42);
+    const base_t second  = GENERATE(as<base_t>{}, 0, 1, 2, 42);
+    const base_t third  = GENERATE(as<base_t>{}, 0, 1, 2, 42);
+    const base_t fourth  = GENERATE(as<base_t>{}, 0, 1, 2, 42);
     const base_t update = 60;
 
     CAPTURE(first, second, third, fourth, update, first_max, second_max, third_max, fourth_max);
@@ -572,3 +573,28 @@ TEMPLATE_TEST_CASE_SIG(
         }
     }
 }
+
+/* TODO
+TEST_CASE(
+    "Data type reinterpretation", 
+    "[pack][reinterpret][template]")
+{
+    SECTION("pack of two std::uint8_t and one float")
+    {
+        using pack_t = PackedTriple<std::uint64_t, 8, 8, 32>;
+        
+        const float a = GENERATE(as<std::uint8_t>{}, 0, 1, 3, 255); 
+        const float b = GENERATE(as<std::uint8_t>{}, 0, 1, 3, 255); 
+        const float c = GENERATE(as<float>{}, 1.0, 1.22, 3.14, 9999999.9999); 
+
+        CAPTURE(a, b, c);
+
+        pack_t pack{a, b, c};
+
+        CHECK(pack.first<std::uint8_t>() == a);
+        CHECK(pack.get<1, std::uint8_t>() == b);
+        //CHECK(pack.third<float>() == c);
+        //CHECK(pack.get<2, float>() == c);
+    }
+}
+*/

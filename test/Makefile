@@ -9,7 +9,7 @@ STD := c++14
 NVCC := nvcc
 CCFLAGS := -O3 -fopenmp
 NVCCGENCODE = -arch=sm_35
-NVCCFLAGS := -std=$(STD) $(NVCCGENCODE) --expt-extended-lambda -ccbin $(CC) $(addprefix -Xcompiler ,$(CCFLAGS))
+NVCCFLAGS := -O3 -std=$(STD) $(NVCCGENCODE) --expt-extended-lambda -ccbin $(CC) $(addprefix -Xcompiler ,$(CCFLAGS))
 
 SRC := $(wildcard $(SRCDIR)/*.cu)
 OBJ := $(SRC:$(SRCDIR)/%.cu=$(BUILDDIR)/%.o)
@@ -25,10 +25,10 @@ $(BUILDDIR)/packed_types_test.o: $(SRCDIR)/packed_types_test.cu | $(BUILDDIR)
 $(BUILDDIR)/catch_main.o: $(SRCDIR)/catch_main.cu | $(BUILDDIR)
 	$(NVCC) -I$(TESTINCDIR) $(NVCCFLAGS) -c $< -o $@
 
-debug: NVCCFLAGS += -g -O0 -Xptxas -v -UNDEBUG
+debug: NVCCFLAGS += -g -O0 -Xptxas -v -UNDEBUG -D_DEBUG
 debug: all
 
-profile: NVCCFLAGS += -lineinfo -g -Xptxas -v
+profile: NVCCFLAGS += -lineinfo -g -Xptxas -v -DUNDEBUG
 profile: all
 
 clean:

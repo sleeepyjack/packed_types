@@ -18,13 +18,13 @@ int main (int argc, char *argv[])
         << sizeof(base_t)
         << std::endl;
         
-    // print data layout (curly braces denote padding bits)
+    // print data layout
     std::cout 
-        << "bit partition: [[" 
-        << pack_t::first_bits() << "]["
-        << pack_t::second_bits() << "]["
-        << pack_t::third_bits() << "]{"
-        << pack_t::padding_bits() << "}]"
+        << "bit partition: MSB->{padding=" 
+        << pack_t::padding_bits() << "bits}[third="
+        << pack_t::third_bits() << "bits][second="
+        << pack_t::second_bits() << "][first="
+        << pack_t::first_bits() << "bits]<-LSB"
         << std::endl; 
 
     // build packed triple
@@ -70,17 +70,20 @@ int main (int argc, char *argv[])
     // or triple.set<2>(42) or triple.template set<2>(42)
     std::cout << "third = " << triple.third() << std::endl;
 
+    // update third field with using a float as input
+    // implicitly reinterpretates bits as base type
+    float pi = 3.14;
+    triple.set<2>(pi);
+    // get float from pack
+    float pi_too = triple.third<float>(); // or triple.get<2, float>()
+    std::cout << pi << " == " << pi_too << std::endl;
+
     // following line should trigger an assertion error since 12345 needs more than 8 bit
     // triple.second(12345);
     std::cout 
         << std::boolalpha
         << "should be false: " 
-        << pack_t::is_valid_second(12345) 
-        << std::endl;
-
-    std::cout 
-        << "maximum value for second field is " 
-        << pack_t::second_max() 
+        << pack_t::is_valid_second(12345) // or is_valid<1>(12345)
         << std::endl;
 
     // support for atomic updates:
