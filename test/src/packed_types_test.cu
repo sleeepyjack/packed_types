@@ -4,7 +4,7 @@
 
 TEMPLATE_TEST_CASE_SIG(
     "PackedPair with variable split", 
-    "[pack][pair][packedpair][variablesplit][template]", 
+    "[pack][pair][packedpair][variablesplit][template]",
     ((std::uint8_t FirstBits, std::uint8_t SecondBits), 
         FirstBits, SecondBits),
         (16, 16),

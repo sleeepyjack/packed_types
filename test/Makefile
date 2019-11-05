@@ -1,41 +1,41 @@
-SRCDIR := src
-BINDIR := bin
-INCDIR := ../include
-TESTINCDIR := include
-BUILDDIR := build
+INCDIRS := include ../include ../include/cudahelpers
 
 CC := g++
-STD := c++14
 NVCC := nvcc
-CCFLAGS := -O3 -fopenmp
+STD := c++14
+OPT := 3
+CCFLAGS := -O$(OPT) -std=$(STD) -Wall -Wextra -fopenmp
+XCCFLAGS := $(addprefix -Xcompiler ,$(CCFLAGS))
 NVCCGENCODE = -arch=sm_35
-NVCCFLAGS := -O3 -std=$(STD) $(NVCCGENCODE) --expt-extended-lambda -ccbin $(CC) $(addprefix -Xcompiler ,$(CCFLAGS))
+NVCCFLAGS := -O$(OPT) -std=$(STD) $(NVCCGENCODE) -ccbin $(CC) $(addprefix -Xcompiler ,$(CCFLAGS)) --expt-extended-lambda
 
-SRC := $(wildcard $(SRCDIR)/*.cu)
-OBJ := $(SRC:$(SRCDIR)/%.cu=$(BUILDDIR)/%.o)
+INCPARAMS := $(addprefix -I, $(INCDIRS))
 
 all: test
 
-test: $(OBJ) | $(BINDIR)
-	$(NVCC) $(NVCCFLAGS) $(OBJ) -o $(BINDIR)/$@
+test: build/packed_types_test.o build/catch_main.o | bin
+	$(NVCC) $(NVCCFLAGS) build/packed_types_test.o build/catch_main.o -o bin/$@
 
-$(BUILDDIR)/packed_types_test.o: $(SRCDIR)/packed_types_test.cu | $(BUILDDIR)
-	$(NVCC) -I$(INCDIR) -I$(TESTINCDIR) $(NVCCFLAGS) -c $< -o $@
+build/packed_types_test.o: src/packed_types_test.cu | build
+	$(NVCC) $(NVCCFLAGS) $(INCPARAMS) -c $< -o $@
 
-$(BUILDDIR)/catch_main.o: $(SRCDIR)/catch_main.cu | $(BUILDDIR)
-	$(NVCC) -I$(TESTINCDIR) $(NVCCFLAGS) -c $< -o $@
+build/catch_main.o: src/catch_main.cu | build
+	$(NVCC) $(NVCCFLAGS) $(INCPARAMS) -c $< -o $@
 
-debug: NVCCFLAGS += -g -O0 -Xptxas -v -UNDEBUG -D_DEBUG
+debug: OPT := 0
+debug: CCFLAGS := -O$(OPT) -std=$(STD) -Wall -Wextra -fopenmp 
+debug: XCCFLAGS := $(addprefix -Xcompiler ,$(CCFLAGS))
+debug: NVCCFLAGS := -O$(OPT) -std=$(STD) -ccbin $(CC) $(XCCFLAGS) $(NVCCGENCODE) --expt-extended-lambda -g -Xptxas -v -UNDEBUG -DDEBUG
 debug: all
 
-profile: NVCCFLAGS += -lineinfo -g -Xptxas -v -DUNDEBUG
+profile: NVCCFLAGS += -lineinfo -g -Xptxas -v -UNDEBUG
 profile: all
 
 clean:
-	$(RM) -r $(BUILDDIR) $(BINDIR)
+	$(RM) -r build bin
 
-$(BUILDDIR) $(BINDIR):
+build bin:
 	mkdir -p $@
 
-.PHONY: clean all $(BUILDDIR) $(BINDIR)
+.PHONY: clean all build bin
 

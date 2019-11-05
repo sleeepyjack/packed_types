@@ -1,29 +1,34 @@
-BINDIR := bin
-INCDIR := include
+INCDIRS := include include/cudahelpers
 
 CC := g++
-STD := c++14
 NVCC := nvcc
-CCFLAGS := -O3
+STD := c++14
+OPT := 3
+CCFLAGS := -O$(OPT) -std=$(STD) -Wall -Wextra -fopenmp
+XCCFLAGS := $(addprefix -Xcompiler ,$(CCFLAGS))
 NVCCGENCODE = -arch=sm_35
-NVCCFLAGS := -O3 -std=$(STD) $(NVCCGENCODE) -ccbin $(CC) $(addprefix -Xcompiler ,$(CCFLAGS))
+NVCCFLAGS := -O$(OPT) -std=$(STD) $(NVCCGENCODE) -ccbin $(CC) $(addprefix -Xcompiler ,$(CCFLAGS)) --expt-extended-lambda
+
+INCPARAMS := $(addprefix -I, $(INCDIRS))
 
 all: example
 
-example: example.cu $(INCDIR)/packed_types.cuh $(INCDIR)/cudahelpers/cuda_helpers.cuh | $(BINDIR)
-	$(NVCC) $(NVCCFLAGS) -I$(INCDIR) example.cu -o $(BINDIR)/example
+example: example.cu include/packed_types.cuh include/cudahelpers/cuda_helpers.cuh | bin
+	$(NVCC) $(NVCCFLAGS) $(INCPARAMS) example.cu -o bin/example
 
-debug: NVCCFLAGS += -g -O0 -Xptxas -v -UNDEBUG -D_DEBUG
+debug: OPT := 0
+debug: CCFLAGS := -O$(OPT) -std=$(STD) -Wall -Wextra -fopenmp 
+debug: XCCFLAGS := $(addprefix -Xcompiler ,$(CCFLAGS))
+debug: NVCCFLAGS := -O$(OPT) -std=$(STD) -ccbin $(CC) $(XCCFLAGS) $(NVCCGENCODE) --expt-extended-lambda -g -Xptxas -v -UNDEBUG -DDEBUG
 debug: all
 
-profile: NVCCFLAGS += -lineinfo -g -Xptxas -v -DNDEBUG
+profile: NVCCFLAGS += -lineinfo -g -Xptxas -v -UNDEBUG
 profile: all
 
 clean:
-	$(RM) -r $(BINDIR)
+	$(RM) -r bin
 
-$(BINDIR):
-	mkdir -p $@
+bin:
+	@mkdir -p $@
 
-.PHONY: clean all $$(BINDIR)
-
+.PHONY: clean all bin

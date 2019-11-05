@@ -1,7 +1,7 @@
 #include <iostream>
 #include "packed_types.cuh"
 
-int main (int argc, char *argv[])
+int main()
 {
     // packed type with three fields: 13 bits, 8 bits, 34 bits, (+ 9 bits padding)
     using pack_t = PackedTriple<13, 8, 34>;

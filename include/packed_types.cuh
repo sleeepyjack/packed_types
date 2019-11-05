@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <type_traits>
 #include <assert.h>
-#include "cudahelpers/cuda_helpers.cuh"
+#include "cuda_helpers.cuh"
 
 // INFO you can find the actual types as using statements at the end of this file
 
