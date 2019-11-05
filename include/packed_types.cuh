@@ -38,15 +38,18 @@ namespace detail
 {
 
 template<
-    class Base,
-    Base  FirstBits,
-    Base  SecondBits,
-    Base  ThirdBits = 0,
-    Base  FourthBits = 0>
+    std::uint8_t FirstBits,
+    std::uint8_t SecondBits,
+    std::uint8_t ThirdBits = 0,
+    std::uint8_t FourthBits = 0>
 class Pack
 {
     // memory layout: MSB->padding|fourth|third|second|first<-LSB
 
+public:
+    using base_type = uint_t<FirstBits + SecondBits + ThirdBits + FourthBits>;
+
+private:
     static_assert(
         FirstBits != 0 && SecondBits != 0,
         "FirstBits and SecondBits both may not be zero.");
@@ -55,68 +58,58 @@ class Pack
         !(ThirdBits == 0 && FourthBits != 0),
         "Third type cannot be zero-width if fourth type has non-zero width.");
 
-    static_assert(
-        FirstBits + SecondBits + ThirdBits + FourthBits <= sizeof(Base) * 8,
-        "Too many bits for chosen datatype.");
-
-    static_assert(
-        std::is_fundamental<Base>::value,
-        "Base type must be fundamental.");
-
     // leftover bits are padding
-    static constexpr Base PaddingBits = 
-        (sizeof(Base) * 8) - (FirstBits + SecondBits + ThirdBits + FourthBits);
+    static constexpr base_type PaddingBits = 
+        (sizeof(base_type) * CHAR_BIT) - (FirstBits + SecondBits + ThirdBits + FourthBits);
 
     // bit masks for each individual field
-    static constexpr Base first_mask = ((Base{1} << FirstBits) - Base{1});
+    static constexpr base_type first_mask = ((base_type{1} << FirstBits) - base_type{1});
 
-    static constexpr Base second_mask = 
-        ((Base{1} << SecondBits) - Base{1}) << 
+    static constexpr base_type second_mask = 
+        ((base_type{1} << SecondBits) - base_type{1}) << 
             (FirstBits);
 
-    static constexpr Base third_mask = 
+    static constexpr base_type third_mask = 
         (ThirdBits == 0) ? 
-            Base{0} : 
-            ((Base{1} << ThirdBits) - Base{1}) << 
+            base_type{0} : 
+            ((base_type{1} << ThirdBits) - base_type{1}) << 
                 (FirstBits + SecondBits);
 
-    static constexpr Base fourth_mask = 
+    static constexpr base_type fourth_mask = 
         (FourthBits == 0) ? 
-            Base{0} : 
-            ((Base{1} << FourthBits) - Base{1}) << 
+            base_type{0} : 
+            ((base_type{1} << FourthBits) - base_type{1}) << 
                 (FirstBits + SecondBits + ThirdBits);
 
-    static constexpr Base padding_mask = 
+    static constexpr base_type padding_mask = 
         (PaddingBits == 0) ? 
-            Base{0} : 
-            ((Base{1} << PaddingBits) - Base{1}) << 
+            base_type{0} : 
+            ((base_type{1} << PaddingBits) - base_type{1}) << 
                 (FirstBits + SecondBits + ThirdBits + FourthBits);
 
 
 public:
-    using base_type = Base;
-
     // number of bits per field
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    static constexpr Base padding_bits() noexcept { return PaddingBits; }
+    static constexpr std::uint8_t padding_bits() noexcept { return PaddingBits; }
 
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    static constexpr Base first_bits() noexcept { return FirstBits; }
+    static constexpr std::uint8_t first_bits() noexcept { return FirstBits; }
 
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    static constexpr Base second_bits() noexcept { return SecondBits; }
-
-    template<
-        Base B = ThirdBits,
-	    class  = std::enable_if_t<B != 0>>
-    HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    static constexpr Base third_bits() noexcept { return ThirdBits; }
+    static constexpr std::uint8_t second_bits() noexcept { return SecondBits; }
 
     template<
-        Base B = FourthBits,
-	    class  = std::enable_if_t<B != 0>>
+        base_type B = ThirdBits,
+	    class = std::enable_if_t<B != 0>>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    static constexpr Base fourth_bits() noexcept { return FourthBits; }
+    static constexpr std::uint8_t third_bits() noexcept { return ThirdBits; }
+
+    template<
+        base_type B = FourthBits,
+	    class = std::enable_if_t<B != 0>>
+    HOSTDEVICEQUALIFIER INLINEQUALIFIER
+    static constexpr std::uint8_t fourth_bits() noexcept { return FourthBits; }
 
     // CONSTRUCTORS
     HOSTDEVICEQUALIFIER
@@ -125,9 +118,9 @@ public:
     template<
         class FirstType,
         class SecondType,
-        Base B1 = ThirdBits,
-        Base B2 = FourthBits,
-	    class   = std::enable_if_t<B1 == 0 && B2 == 0>>
+        std::uint8_t B1 = ThirdBits,
+        std::uint8_t B2 = FourthBits,
+	    class = std::enable_if_t<B1 == 0 && B2 == 0>>
     HOSTDEVICEQUALIFIER    
     constexpr explicit Pack(
         FirstType first_, 
@@ -141,9 +134,9 @@ public:
         class FirstType,
         class SecondType,
         class ThirdType,
-        Base B1 = ThirdBits,
-        Base B2 = FourthBits,
-        class   = std::enable_if_t<B1 != 0 && B2 == 0>>
+        std::uint8_t B1 = ThirdBits,
+        std::uint8_t B2 = FourthBits,
+        class = std::enable_if_t<B1 != 0 && B2 == 0>>
     HOSTDEVICEQUALIFIER
     constexpr explicit Pack(
         FirstType first_, 
@@ -160,9 +153,9 @@ public:
         class SecondType,
         class ThirdType,
         class FourthType,
-        Base B1 = ThirdBits,
-        Base B2 = FourthBits,
-	    class   = std::enable_if_t<B1 != 0 && B2 != 0>>
+        std::uint8_t B1 = ThirdBits,
+        std::uint8_t B2 = FourthBits,
+	    class = std::enable_if_t<B1 != 0 && B2 != 0>>
     HOSTDEVICEQUALIFIER
     constexpr explicit Pack(
         FirstType first_, 
@@ -183,7 +176,7 @@ public:
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
     static constexpr Pack empty() noexcept 
     { 
-        return Pack(Base{0});
+        return Pack(base_type{0});
     }
 
     // SETTERS
@@ -194,11 +187,11 @@ public:
     {
         debug_printf(
             "Type reinterpretation inside setter of first field.");
-        first(reinterpret_as<Base>(first_));
+        first(reinterpret_as<base_type>(first_));
     }
 
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    constexpr void first(Base first_) noexcept
+    constexpr void first(base_type first_) noexcept
     {
         assert(is_valid_first(first_));
         base_ = (base_ & ~first_mask) + (first_ & first_mask);
@@ -210,11 +203,11 @@ public:
     {
         debug_printf(
             "Type reinterpretation inside setter of second field.");
-        second(reinterpret_as<Base>(second_));
+        second(reinterpret_as<base_type>(second_));
     }
 
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    constexpr void second(Base second_) noexcept
+    constexpr void second(base_type second_) noexcept
     {
         assert(is_valid_second(second_));
         constexpr auto shift = FirstBits;
@@ -223,21 +216,21 @@ public:
 
     template<
         class Third,
-        Base B = ThirdBits,
-	    class  = std::enable_if_t<B != 0>>
+        std::uint8_t B = ThirdBits,
+	    class = std::enable_if_t<B != 0>>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
     constexpr void third(Third third_) noexcept
     {
         debug_printf(
             "Type reinterpretation inside setter of third field.");
-        third(reinterpret_as<Base>(third_));
+        third(reinterpret_as<base_type>(third_));
     }
 
     template<
-        Base B = ThirdBits,
-	    class  = std::enable_if_t<B != 0>>
+        std::uint8_t B = ThirdBits,
+	    class = std::enable_if_t<B != 0>>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    constexpr void third(Base third_) noexcept
+    constexpr void third(base_type third_) noexcept
     {
         assert(is_valid_third(third_));
         constexpr auto shift = FirstBits + SecondBits;
@@ -246,21 +239,21 @@ public:
 
     template<
         class Fourth,
-        Base B = FourthBits,
-	    class  = std::enable_if_t<B != 0>>
+        std::uint8_t B = FourthBits,
+	    class = std::enable_if_t<B != 0>>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
     constexpr void fourth(Fourth fourth_) noexcept
     {
         debug_printf(
             "Type reinterpretation inside setter of fourth field.");
-        fourth(reinterpret_as<Base>(fourth_));
+        fourth(reinterpret_as<base_type>(fourth_));
     }
 
     template<
-        Base B = FourthBits,
+        std::uint8_t B = FourthBits,
 	    class  = std::enable_if_t<B != 0>>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    constexpr void fourth(Base fourth_) noexcept
+    constexpr void fourth(base_type fourth_) noexcept
     {
         assert(is_valid_fourth(fourth_));
         constexpr auto shift = FirstBits + SecondBits + ThirdBits;
@@ -279,7 +272,7 @@ public:
     }
 
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    constexpr Base first() const noexcept
+    constexpr base_type first() const noexcept
     {
         return (base_ & first_mask);
     }
@@ -294,15 +287,15 @@ public:
     }
 
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    constexpr Base second() const noexcept
+    constexpr base_type second() const noexcept
     {
         return ((base_ & second_mask) >> (FirstBits));
     }
 
     template<
         class T,
-        Base B = ThirdBits,
-	    class  = std::enable_if_t<B != 0>>
+        std::uint8_t B = ThirdBits,
+	    class = std::enable_if_t<B != 0>>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
     constexpr T third() const noexcept
     {
@@ -312,18 +305,18 @@ public:
     }
 
     template<
-        Base B = ThirdBits,
-	    class  = std::enable_if_t<B != 0>>
+        std::uint8_t B = ThirdBits,
+	    class = std::enable_if_t<B != 0>>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    constexpr Base third() const noexcept
+    constexpr base_type third() const noexcept
     {
         return ((base_ & third_mask) >> (FirstBits + SecondBits));
     }
 
     template<
         class T,
-        Base B = FourthBits,
-	    class  = std::enable_if_t<B != 0>>
+        std::uint8_t B = FourthBits,
+	    class = std::enable_if_t<B != 0>>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
     constexpr T fourth() const noexcept
     {
@@ -333,16 +326,16 @@ public:
     }
 
     template<
-        Base B = FourthBits,
-	    class  = std::enable_if_t<B != 0>>
+        std::uint8_t B = FourthBits,
+	    class = std::enable_if_t<B != 0>>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    constexpr Base fourth() const noexcept
+    constexpr base_type fourth() const noexcept
     {
         return ((base_ & fourth_mask) >> (FirstBits + SecondBits + ThirdBits));
     }
 
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    constexpr Base base() const noexcept
+    constexpr base_type base() const noexcept
     {
         return (base_ & ~padding_mask);
     }
@@ -357,7 +350,7 @@ public:
     template<std::size_t I>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
     constexpr typename std::enable_if_t<I == 0, void> 
-    set(Base first_) noexcept { first(first_); }
+    set(base_type first_) noexcept { first(first_); }
 
     template<std::size_t I, class T>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
@@ -367,7 +360,7 @@ public:
     template<std::size_t I>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
     constexpr typename std::enable_if_t<I == 1, void> 
-    set(Base second_) noexcept { second(second_); }
+    set(base_type second_) noexcept { second(second_); }
 
     template<std::size_t I, class T>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
@@ -377,7 +370,7 @@ public:
     template<std::size_t I>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
     constexpr typename std::enable_if_t<I == 2 && ThirdBits, void> 
-    set(Base third_) noexcept { third(third_); }
+    set(base_type third_) noexcept { third(third_); }
 
     template<std::size_t I, class T>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
@@ -387,7 +380,7 @@ public:
     template<std::size_t I>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
     constexpr typename std::enable_if_t<I == 3 && ThirdBits && FourthBits, void> 
-    set(Base fourth_) noexcept { fourth(fourth_); }
+    set(base_type fourth_) noexcept { fourth(fourth_); }
 
     // GETTERS
     // get<index>()
@@ -398,7 +391,7 @@ public:
 
     template<std::size_t I>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    constexpr typename std::enable_if_t<I == 0, Base> 
+    constexpr typename std::enable_if_t<I == 0, base_type> 
     get() const noexcept { return first(); }
 
     template<std::size_t I, class T>
@@ -408,7 +401,7 @@ public:
 
     template<std::size_t I>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    constexpr typename std::enable_if_t<I == 1, Base> 
+    constexpr typename std::enable_if_t<I == 1, base_type> 
     get() const noexcept { return second(); }
 
     template<std::size_t I, class T>
@@ -418,7 +411,7 @@ public:
 
     template<std::size_t I>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    constexpr typename std::enable_if_t<I == 2 && ThirdBits, Base> 
+    constexpr typename std::enable_if_t<I == 2 && ThirdBits, base_type> 
     get() const noexcept { return third(); }
 
     template<std::size_t I, class T>
@@ -428,7 +421,7 @@ public:
 
     template<std::size_t I>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    constexpr typename std::enable_if_t<I == 3 && ThirdBits && FourthBits, Base> 
+    constexpr typename std::enable_if_t<I == 3 && ThirdBits && FourthBits, base_type> 
     get() const noexcept { return fourth(); }
 
     // INPUT VALIDATORS
@@ -438,13 +431,13 @@ public:
     {
         debug_printf(
             "Type reinterpretation during input validation of first field.");
-        return is_valid_first(reinterpret_as<Base>(first_));
+        return is_valid_first(reinterpret_as<base_type>(first_));
     }
 
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    static constexpr bool is_valid_first(Base first_) noexcept
+    static constexpr bool is_valid_first(base_type first_) noexcept
     {
-        return !(first_ & ~((Base{1} << FirstBits) - Base{1}));
+        return !(first_ & ~((base_type{1} << FirstBits) - base_type{1}));
     }
 
     template<class T>
@@ -453,55 +446,55 @@ public:
     {
         debug_printf(
             "Type reinterpretation during input validation of second field.");
-        return is_valid_second(reinterpret_as<Base>(second_));
+        return is_valid_second(reinterpret_as<base_type>(second_));
     }
 
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    static constexpr bool is_valid_second(Base second_) noexcept
+    static constexpr bool is_valid_second(base_type second_) noexcept
     {
-        return !(second_ & ~((Base{1} << SecondBits) - Base{1}));
+        return !(second_ & ~((base_type{1} << SecondBits) - base_type{1}));
     }
 
     template<
         class T,
-        Base B = ThirdBits,
-	    class  = std::enable_if_t<B != 0>>
+        std::uint8_t B = ThirdBits,
+	    class = std::enable_if_t<B != 0>>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
     static constexpr bool is_valid_third(T third_) noexcept
     {
         debug_printf(
             "Type reinterpretation during input validation of third field.");
-        return is_valid_third(reinterpret_as<Base>(third_));
+        return is_valid_third(reinterpret_as<base_type>(third_));
     }
 
     template<
-        Base B = ThirdBits,
-	    class  = std::enable_if_t<B != 0>>
+        std::uint8_t B = ThirdBits,
+	    class = std::enable_if_t<B != 0>>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    static constexpr bool is_valid_third(Base third_) noexcept
+    static constexpr bool is_valid_third(base_type third_) noexcept
     {
-        return !(third_ & ~((Base{1} << ThirdBits) - Base{1}));
+        return !(third_ & ~((base_type{1} << ThirdBits) - base_type{1}));
     }
 
     template<
         class T,
-        Base B = FourthBits,
-	    class  = std::enable_if_t<B != 0>>
+        std::uint8_t B = FourthBits,
+	    class = std::enable_if_t<B != 0>>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
     static constexpr bool is_valid_fourth(T fourth_) noexcept
     {
         debug_printf(
             "Type reinterpretation during input validation of fourth field.");
-        return is_valid_fourth(reinterpret_as<Base>(fourth_));
+        return is_valid_fourth(reinterpret_as<base_type>(fourth_));
     }
 
     template<
-        Base B = FourthBits,
-	    class  = std::enable_if_t<B != 0>>
+        std::uint8_t B = FourthBits,
+	    class = std::enable_if_t<B != 0>>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    static constexpr bool is_valid_fourth(Base fourth_) noexcept
+    static constexpr bool is_valid_fourth(base_type fourth_) noexcept
     {
-        return !(fourth_ & ~((Base{1} << FourthBits) - Base{1}));
+        return !(fourth_ & ~((base_type{1} << FourthBits) - base_type{1}));
     }
 
     template<std::size_t I, class T>
@@ -557,9 +550,11 @@ public:
     }
 
     // CUDA ATOMICS
-    // TODO enable_if valid type for CUDA atomics
     DEVICEQUALIFIER INLINEQUALIFIER
-    friend Pack atomicCAS(
+    friend typename std::enable_if_t<
+        (std::is_same<base_type, std::uint32_t>::value || 
+         std::is_same<base_type, std::uint64_t>::value), 
+        Pack> atomicCAS(
         Pack * address_, 
         Pack   compare_, 
         Pack   val_) noexcept
@@ -568,7 +563,10 @@ public:
     }
 
     DEVICEQUALIFIER INLINEQUALIFIER
-    friend Pack atomicExch(
+    friend typename std::enable_if_t<
+        (std::is_same<base_type, std::uint32_t>::value || 
+         std::is_same<base_type, std::uint64_t>::value), 
+        Pack> atomicExch(
         Pack * address_, 
         Pack   val_) noexcept
     {
@@ -577,30 +575,35 @@ public:
 
 private:
     HOSTDEVICEQUALIFIER
-    explicit constexpr Pack(Base base) noexcept : base_{base} {}
+    explicit constexpr Pack(base_type base) noexcept : base_{base} {}
 
-    Base base_;
+    base_type base_;
 
 }; // class Pack
 
 } // namespace detail
 
 // std::get support
-template<std::size_t I, class Base, Base B1, Base B2, Base B3, Base B4>
+template<
+    std::size_t I, 
+    std::uint8_t B1, 
+    std::uint8_t B2, 
+    std::uint8_t B3, 
+    std::uint8_t B4>
 HOSTDEVICEQUALIFIER INLINEQUALIFIER
-constexpr Base get(detail::Pack<Base, B1, B2, B3, B4> pack) noexcept 
+constexpr uint_t<B1 + B2 + B3 + B4> get(detail::Pack<B1, B2, B3, B4> pack) noexcept 
 { 
     return pack.template get<I>(); 
 }
 
 // packed type aliases
-template<class Base, Base FirstBits, Base SecondBits>
-using PackedPair = detail::Pack<Base, FirstBits, SecondBits>;
+template<std::uint8_t FirstBits, std::uint8_t SecondBits>
+using PackedPair = detail::Pack<FirstBits, SecondBits>;
 
-template<class Base, Base FirstBits, Base SecondBits, Base ThirdBits>
-using PackedTriple = detail::Pack<Base, FirstBits, SecondBits, ThirdBits>;
+template<std::uint8_t FirstBits, std::uint8_t SecondBits, std::uint8_t ThirdBits>
+using PackedTriple = detail::Pack<FirstBits, SecondBits, ThirdBits>;
 
-template<class Base, Base FirstBits, Base SecondBits, Base ThirdBits, Base FourthBits>
-using PackedQuadruple = detail::Pack<Base, FirstBits, SecondBits, ThirdBits, FourthBits>;
+template<std::uint8_t FirstBits, std::uint8_t SecondBits, std::uint8_t ThirdBits, std::uint8_t FourthBits>
+using PackedQuadruple = detail::Pack<FirstBits, SecondBits, ThirdBits, FourthBits>;
 
 #endif /*PACKED_TYPES_CUH*/

@@ -5,21 +5,21 @@
 TEMPLATE_TEST_CASE_SIG(
     "PackedPair with variable split", 
     "[pack][pair][packedpair][variablesplit][template]", 
-    ((class Base, Base FirstBits, Base SecondBits), 
-        Base, FirstBits, SecondBits),
-        (std::uint32_t, 16, 16),
-        (std::uint32_t, 15, 17),
-        (std::uint32_t, 18, 14),
-        (std::uint32_t, 7, 7),        
-        (std::uint64_t, 32, 32),
-        (std::uint64_t, 31, 33),
-        (std::uint64_t, 34, 30),
-        (std::uint64_t, 7, 7))
+    ((std::uint8_t FirstBits, std::uint8_t SecondBits), 
+        FirstBits, SecondBits),
+        (16, 16),
+        (15, 17),
+        (18, 14),
+        (7, 10),        
+        (32, 32),
+        (31, 33),
+        (34, 30),
+        (10, 7))
 {
-    REQUIRE(FirstBits + SecondBits <= sizeof(Base) * 8);
+    using pack_t = PackedPair<FirstBits, SecondBits>;
+    using base_t = typename pack_t::base_type;
 
-    using pack_t = PackedPair<Base, FirstBits, SecondBits>;
-    using base_t   = typename pack_t::base_type;
+    REQUIRE(FirstBits + SecondBits <= sizeof(base_t) * CHAR_BIT);
     
     const base_t first_max = (base_t{1} << pack_t::first_bits()) - base_t{1};
     const base_t second_max = (base_t{1} << pack_t::second_bits()) - base_t{1};
@@ -162,22 +162,21 @@ TEMPLATE_TEST_CASE_SIG(
 TEMPLATE_TEST_CASE_SIG(
     "PackedTriple with variable split", 
     "[pack][triple][packedtriple][variablesplit][template]", 
-    ((class Base, Base FirstBits, Base SecondBits, Base ThirdBits), 
-        Base, FirstBits, SecondBits, ThirdBits), 
-        (std::uint32_t, 10, 10, 12),
-        (std::uint32_t, 8, 9, 15),
-        (std::uint32_t, 13, 8, 11),
-        (std::uint32_t, 7, 7, 7),
-        (std::uint64_t, 20, 20, 24),
-        (std::uint64_t, 18, 19, 27),
-        (std::uint64_t, 23, 19, 22),
-        (std::uint64_t, 7, 7, 7))
+    ((std::uint8_t FirstBits, std::uint8_t SecondBits, std::uint8_t ThirdBits), 
+        FirstBits, SecondBits, ThirdBits), 
+        (10, 10, 12),
+        (8, 9, 15),
+        (13, 8, 11),
+        (7, 7, 7),
+        (20, 20, 24),
+        (18, 19, 27),
+        (23, 19, 22))
 {
-    REQUIRE(FirstBits + SecondBits + ThirdBits <= sizeof(Base) * 8);
-
-    using pack_t = PackedTriple<Base, FirstBits, SecondBits, ThirdBits>;
+    using pack_t = PackedTriple<FirstBits, SecondBits, ThirdBits>;
     using base_t = typename pack_t::base_type;
-    
+
+    REQUIRE(FirstBits + SecondBits + ThirdBits <= sizeof(base_t) * 8);
+
     const base_t first_max = (base_t{1} << pack_t::first_bits()) - base_t{1};
     const base_t second_max = (base_t{1} << pack_t::second_bits()) - base_t{1};
     const base_t third_max = (base_t{1} << pack_t::third_bits()) - base_t{1};
@@ -351,22 +350,21 @@ TEMPLATE_TEST_CASE_SIG(
 TEMPLATE_TEST_CASE_SIG(
     "PackedQuadruple with variable split", 
     "[pack][quadruple][packedquadruple][variablesplit][template]", 
-    ((class Base, Base FirstBits, Base SecondBits, Base ThirdBits, Base FourthBits), 
-        Base, FirstBits, SecondBits, ThirdBits, FourthBits), 
-        (std::uint32_t, 8, 8, 8, 8),
-        (std::uint32_t, 7, 9, 9, 7),
-        (std::uint32_t, 9, 8, 7, 8),
-        (std::uint32_t, 7, 7, 7, 7),
-        (std::uint64_t, 16, 16, 16, 16),
-        (std::uint64_t, 15, 17, 13, 19),
-        (std::uint64_t, 8, 8, 32, 16),
-        (std::uint64_t, 7, 7, 7, 7))
+    ((std::uint8_t FirstBits, std::uint8_t SecondBits, std::uint8_t ThirdBits, std::uint8_t FourthBits), 
+        FirstBits, SecondBits, ThirdBits, FourthBits), 
+        (8, 8, 8, 8),
+        (7, 9, 9, 7),
+        (9, 8, 7, 8),
+        (7, 7, 7, 7),
+        (16, 16, 16, 16),
+        (15, 17, 13, 19),
+        (8, 8, 32, 16))
 {
-    REQUIRE(FirstBits + SecondBits + ThirdBits + FourthBits <= sizeof(Base) * 8);
-
-    using pack_t = PackedQuadruple<Base, FirstBits, SecondBits, ThirdBits, FourthBits>;
+    using pack_t = PackedQuadruple<FirstBits, SecondBits, ThirdBits, FourthBits>;
     using base_t = typename pack_t::base_type;
-    
+
+    REQUIRE(FirstBits + SecondBits + ThirdBits + FourthBits <= sizeof(base_t) * 8);
+
     const base_t first_max = (base_t{1} << pack_t::first_bits()) - base_t{1};
     const base_t second_max = (base_t{1} << pack_t::second_bits()) - base_t{1};
     const base_t third_max = (base_t{1} << pack_t::third_bits()) - base_t{1};

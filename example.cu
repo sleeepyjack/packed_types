@@ -3,13 +3,13 @@
 
 int main (int argc, char *argv[])
 {
-    // payload of packed data type
-    using base_t = std::uint64_t;
-
     // packed type with three fields: 13 bits, 8 bits, 34 bits, (+ 9 bits padding)
-    using pack_t = PackedTriple<base_t, 13, 8, 34>;
-    // or using pack_t = PackedPair<base_t, _, _>;
-    // or using pack_t = PackedQuadruple<base_t, _, _, _, _>;
+    using pack_t = PackedTriple<13, 8, 34>;
+    // or using pack_t = PackedPair<_, _>;
+    // or using pack_t = PackedQuadruple<_, _, _, _>;
+
+    // payload of packed data type
+    using base_t = pack_t::base_type;
     
     std::cout 
         << "size of pack_t="  
@@ -21,10 +21,10 @@ int main (int argc, char *argv[])
     // print data layout
     std::cout 
         << "bit partition: MSB->{padding=" 
-        << pack_t::padding_bits() << "bits}[third="
-        << pack_t::third_bits() << "bits][second="
-        << pack_t::second_bits() << "][first="
-        << pack_t::first_bits() << "bits]<-LSB"
+        << +pack_t::padding_bits() << "bits}[third="
+        << +pack_t::third_bits() << "bits][second="
+        << +pack_t::second_bits() << "][first="
+        << +pack_t::first_bits() << "bits]<-LSB"
         << std::endl; 
 
     // build packed triple
