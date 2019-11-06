@@ -14,12 +14,12 @@ HOSTDEVICEQUALIFIER INLINEQUALIFIER
 constexpr To reinterpret_as(From from) noexcept
 {
     static_assert(
-        std::is_fundamental<To>::value,
-        "Target type must be fundamental.");
+        (std::is_fundamental<To>::value || std::is_enum<To>::value),
+        "Target type must be fundamental enum.");
 
     static_assert(
-        std::is_fundamental<From>::value,
-        "Input type must be fundamental.");
+        (std::is_fundamental<From>::value || std::is_enum<From>::value),
+        "Input type must be fundamental or enum.");
 
     union reinterpreter_t
     {
