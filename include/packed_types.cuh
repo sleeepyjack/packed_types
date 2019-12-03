@@ -30,6 +30,7 @@ constexpr To reinterpret_as(From from) noexcept
         constexpr reinterpreter_t() noexcept : to(To()) {}
     } reinterpreter;
 
+    // TODO add warning for narrowing conversions if desired
     reinterpreter.from = from;
     return reinterpreter.to;
 }
@@ -86,7 +87,6 @@ private:
             base_type{0} :
             ((base_type{1} << PaddingBits) - base_type{1}) <<
                 (FirstBits + SecondBits + ThirdBits + FourthBits);
-
 
 public:
     // number of bits per field
@@ -185,6 +185,10 @@ public:
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
     constexpr void first(First first_) noexcept
     {
+        static_assert(
+            sizeof(First) <= sizeof(base_type),
+            "Input type too wide. Truncation imminent.");
+
         first(reinterpret_as<base_type>(first_));
     }
 
@@ -199,6 +203,10 @@ public:
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
     constexpr void second(Second second_) noexcept
     {
+        static_assert(
+            sizeof(Second) <= sizeof(base_type),
+            "Input type too wide. Truncation imminent.");
+
         second(reinterpret_as<base_type>(second_));
     }
 
@@ -217,6 +225,10 @@ public:
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
     constexpr void third(Third third_) noexcept
     {
+        static_assert(
+            sizeof(Third) <= sizeof(base_type),
+            "Input type too wide. Truncation imminent.");
+
         third(reinterpret_as<base_type>(third_));
     }
 
@@ -238,6 +250,10 @@ public:
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
     constexpr void fourth(Fourth fourth_) noexcept
     {
+        static_assert(
+            sizeof(Fourth) <= sizeof(base_type),
+            "Input type too wide. Truncation imminent.");
+
         fourth(reinterpret_as<base_type>(fourth_));
     }
 
@@ -256,7 +272,7 @@ public:
     // by field name
     template<class T>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    constexpr T first() const noexcept
+    constexpr T first_as() const noexcept
     {
         return reinterpret_as<T>(first());
     }
@@ -269,7 +285,7 @@ public:
 
     template<class T>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    constexpr T second() const noexcept
+    constexpr T second_as() const noexcept
     {
         return reinterpret_as<T>(second());
     }
@@ -285,7 +301,7 @@ public:
         std::uint8_t B = ThirdBits,
         class = std::enable_if_t<B != 0>>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    constexpr T third() const noexcept
+    constexpr T third_as() const noexcept
     {
         return reinterpret_as<T>(third());
     }
@@ -304,7 +320,7 @@ public:
         std::uint8_t B = FourthBits,
         class = std::enable_if_t<B != 0>>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
-    constexpr T fourth() const noexcept
+    constexpr T fourth_as() const noexcept
     {
         return reinterpret_as<T>(fourth());
     }
@@ -371,7 +387,7 @@ public:
     template<std::size_t I, class T>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
     constexpr typename std::enable_if_t<I == 0, T>
-    get() const noexcept { return first<T>(); }
+    get() const noexcept { return first_as<T>(); }
 
     template<std::size_t I>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
@@ -381,7 +397,7 @@ public:
     template<std::size_t I, class T>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
     constexpr typename std::enable_if_t<I == 1, T>
-    get() const noexcept { return second<T>(); }
+    get() const noexcept { return second_as<T>(); }
 
     template<std::size_t I>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
@@ -391,7 +407,7 @@ public:
     template<std::size_t I, class T>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
     constexpr typename std::enable_if_t<I == 2 && ThirdBits, T>
-    get() const noexcept { return third<T>(); }
+    get() const noexcept { return third_as<T>(); }
 
     template<std::size_t I>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
@@ -401,7 +417,7 @@ public:
     template<std::size_t I, class T>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER
     constexpr typename std::enable_if_t<I == 3 && ThirdBits && FourthBits, T>
-    get() const noexcept { return fourth<T>(); }
+    get() const noexcept { return fourth_as<T>(); }
 
     template<std::size_t I>
     HOSTDEVICEQUALIFIER INLINEQUALIFIER

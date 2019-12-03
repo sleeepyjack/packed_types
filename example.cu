@@ -75,7 +75,7 @@ int main()
     float pi = 3.14;
     triple.set<2>(pi);
     // get float from pack
-    float pi_too = triple.third<float>(); // or triple.get<2, float>()
+    float pi_too = triple.third_as<float>(); // or triple.get<2, float>()
     std::cout << pi << " == " << pi_too << std::endl;
 
     // following line should trigger an assertion error since 12345 needs more than 8 bit
