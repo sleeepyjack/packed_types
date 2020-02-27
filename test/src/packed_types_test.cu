@@ -1,16 +1,16 @@
 #include "catch.hpp"
 #include "packed_types.cuh"
-#include "cudahelpers/cuda_helpers.cuh"
+#include "cuda_helpers.cuh"
 
 TEMPLATE_TEST_CASE_SIG(
-    "PackedPair with variable split", 
+    "PackedPair with variable split",
     "[pack][pair][packedpair][variablesplit][template]",
-    ((std::uint8_t FirstBits, std::uint8_t SecondBits), 
+    ((std::uint8_t FirstBits, std::uint8_t SecondBits),
         FirstBits, SecondBits),
         (16, 16),
         (15, 17),
         (18, 14),
-        (7, 10),        
+        (7, 10),
         (32, 32),
         (31, 33),
         (34, 30),
@@ -20,7 +20,7 @@ TEMPLATE_TEST_CASE_SIG(
     using base_t = typename pack_t::base_type;
 
     REQUIRE(FirstBits + SecondBits <= sizeof(base_t) * CHAR_BIT);
-    
+
     const base_t first_max = (base_t{1} << pack_t::first_bits()) - base_t{1};
     const base_t second_max = (base_t{1} << pack_t::second_bits()) - base_t{1};
     const base_t first  = GENERATE(as<base_t>{}, 0, 1, 2, 42);
@@ -107,7 +107,7 @@ TEMPLATE_TEST_CASE_SIG(
             CHECK(pack.first() == first);
             CHECK(pack.second() == second_max);
         }
-        
+
         SECTION("atomic operations")
         {
             pack_t val = pack_t(update, update);
@@ -134,12 +134,12 @@ TEMPLATE_TEST_CASE_SIG(
 
                 CHECK(pack == val);
             }
-            
+
             SECTION("atomic exchange")
             {
                 cudaMemcpy(pack_d, &pack, sizeof(pack_t), H2D);
                 REQUIRE(cudaGetLastError() == cudaSuccess);
-    
+
                 lambda_kernel
                 <<<1, 1>>>([=] DEVICEQUALIFIER
                 {
@@ -151,19 +151,19 @@ TEMPLATE_TEST_CASE_SIG(
 
                 CHECK(pack == val);
             }
-            
+
             cudaFree(pack_d);
             CHECK(cudaGetLastError() == cudaSuccess);
         }
-        
+
     }
 }
 
 TEMPLATE_TEST_CASE_SIG(
-    "PackedTriple with variable split", 
-    "[pack][triple][packedtriple][variablesplit][template]", 
-    ((std::uint8_t FirstBits, std::uint8_t SecondBits, std::uint8_t ThirdBits), 
-        FirstBits, SecondBits, ThirdBits), 
+    "PackedTriple with variable split",
+    "[pack][triple][packedtriple][variablesplit][template]",
+    ((std::uint8_t FirstBits, std::uint8_t SecondBits, std::uint8_t ThirdBits),
+        FirstBits, SecondBits, ThirdBits),
         (10, 10, 12),
         (8, 9, 15),
         (13, 8, 11),
@@ -328,7 +328,7 @@ TEMPLATE_TEST_CASE_SIG(
             {
                 cudaMemcpy(pack_d, &pack, sizeof(pack_t), H2D);
                 REQUIRE(cudaGetLastError() == cudaSuccess);
-    
+
                 lambda_kernel
                 <<<1, 1>>>([=] DEVICEQUALIFIER
                 {
@@ -348,10 +348,10 @@ TEMPLATE_TEST_CASE_SIG(
 }
 
 TEMPLATE_TEST_CASE_SIG(
-    "PackedQuadruple with variable split", 
-    "[pack][quadruple][packedquadruple][variablesplit][template]", 
-    ((std::uint8_t FirstBits, std::uint8_t SecondBits, std::uint8_t ThirdBits, std::uint8_t FourthBits), 
-        FirstBits, SecondBits, ThirdBits, FourthBits), 
+    "PackedQuadruple with variable split",
+    "[pack][quadruple][packedquadruple][variablesplit][template]",
+    ((std::uint8_t FirstBits, std::uint8_t SecondBits, std::uint8_t ThirdBits, std::uint8_t FourthBits),
+        FirstBits, SecondBits, ThirdBits, FourthBits),
         (8, 8, 8, 8),
         (7, 9, 9, 7),
         (9, 8, 7, 8),
@@ -553,7 +553,7 @@ TEMPLATE_TEST_CASE_SIG(
             {
                 cudaMemcpy(pack_d, &pack, sizeof(pack_t), H2D);
                 REQUIRE(cudaGetLastError() == cudaSuccess);
-    
+
                 lambda_kernel
                 <<<1, 1>>>([=] DEVICEQUALIFIER
                 {
@@ -574,16 +574,16 @@ TEMPLATE_TEST_CASE_SIG(
 
 /* TODO
 TEST_CASE(
-    "Data type reinterpretation", 
+    "Data type reinterpretation",
     "[pack][reinterpret][template]")
 {
     SECTION("pack of two std::uint8_t and one float")
     {
         using pack_t = PackedTriple<std::uint64_t, 8, 8, 32>;
-        
-        const float a = GENERATE(as<std::uint8_t>{}, 0, 1, 3, 255); 
-        const float b = GENERATE(as<std::uint8_t>{}, 0, 1, 3, 255); 
-        const float c = GENERATE(as<float>{}, 1.0, 1.22, 3.14, 9999999.9999); 
+
+        const float a = GENERATE(as<std::uint8_t>{}, 0, 1, 3, 255);
+        const float b = GENERATE(as<std::uint8_t>{}, 0, 1, 3, 255);
+        const float c = GENERATE(as<float>{}, 1.0, 1.22, 3.14, 9999999.9999);
 
         CAPTURE(a, b, c);
 

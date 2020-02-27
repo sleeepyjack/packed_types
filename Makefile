@@ -1,4 +1,4 @@
-INCDIRS := include include/cudahelpers
+INCDIRS := include ext/cudahelpers
 
 CC := g++
 NVCC := nvcc
@@ -13,11 +13,11 @@ INCPARAMS := $(addprefix -I, $(INCDIRS))
 
 all: example
 
-example: example.cu include/packed_types.cuh include/cudahelpers/cuda_helpers.cuh | bin
+example: example.cu include/packed_types.cuh | bin
 	$(NVCC) $(NVCCFLAGS) $(INCPARAMS) example.cu -o bin/example
 
 debug: OPT := 0
-debug: CCFLAGS := -O$(OPT) -std=$(STD) -Wall -Wextra -fopenmp 
+debug: CCFLAGS := -O$(OPT) -std=$(STD) -Wall -Wextra -fopenmp
 debug: XCCFLAGS := $(addprefix -Xcompiler ,$(CCFLAGS))
 debug: NVCCFLAGS := -O$(OPT) -std=$(STD) -ccbin $(CC) $(XCCFLAGS) $(NVCCGENCODE) --expt-extended-lambda -g -Xptxas -v -UNDEBUG -DDEBUG
 debug: all

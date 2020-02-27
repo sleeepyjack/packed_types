@@ -1,4 +1,4 @@
-INCDIRS := include ../include ../include/cudahelpers
+INCDIRS := include ../include ../ext/cudahelpers
 
 CC := g++
 NVCC := nvcc
@@ -23,7 +23,7 @@ build/catch_main.o: src/catch_main.cu | build
 	$(NVCC) $(NVCCFLAGS) $(INCPARAMS) -c $< -o $@
 
 debug: OPT := 0
-debug: CCFLAGS := -O$(OPT) -std=$(STD) -Wall -Wextra -fopenmp 
+debug: CCFLAGS := -O$(OPT) -std=$(STD) -Wall -Wextra -fopenmp
 debug: XCCFLAGS := $(addprefix -Xcompiler ,$(CCFLAGS))
 debug: NVCCFLAGS := -O$(OPT) -std=$(STD) -ccbin $(CC) $(XCCFLAGS) $(NVCCGENCODE) --expt-extended-lambda -g -Xptxas -v -UNDEBUG -DDEBUG
 debug: all
