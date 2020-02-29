@@ -1,4 +1,4 @@
-INCDIRS := include ext/cudahelpers
+INCDIRS := include
 
 CC := g++
 NVCC := nvcc
